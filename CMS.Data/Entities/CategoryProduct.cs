@@ -20,19 +20,19 @@ namespace CMS.Data.Entities
 
     {
         [Key]
-        public int Id { get; set; }
+        public int Id { get; set; } 
 
         [Required(ErrorMessage = "Tên danh mục không được để trống")]
 
         [StringLength(100)]
 
-        public string Name { get; set; }
+        public string Name { get; set; } // Tên danh mục sản phẩm, bắt buộc phải có, tối đa 100 ký tự
 
-        public string? Description { get; set; }
+        public string? Description { get; set; } // Mô tả danh mục sản phẩm, có thể để trống
 
         // Quan hệ: Một danh mục có nhiều sản phẩm 
 
-        public virtual ICollection<Product>? Products { get; set; }
+        public virtual ICollection<Product>? Products { get; set; } // Một danh mục có thể có nhiều sản phẩm, nên có một tập hợp các sản phẩm liên quan
 
     }
 

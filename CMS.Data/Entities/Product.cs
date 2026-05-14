@@ -20,31 +20,31 @@ namespace CMS.Data.Entities
 
     {
         [Key]
-        public int Id { get; set; }
+        public int Id { get; set; }// Khóa chính, tự động tăng
 
         [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
 
-        public string Name { get; set; }
+        public string Name { get; set; } // Tên sản phẩm, bắt buộc phải có
 
-        public string? Description { get; set; }
+        public string? Description { get; set; } // Mô tả sản phẩm, có thể để trống
 
         [Range(0, double.MaxValue)]
 
         [Column(TypeName = "decimal(18,2)")]
 
-        public decimal Price { get; set; }
+        public decimal Price { get; set; } // Giá sản phẩm, phải là số dương, có 2 chữ số thập phân
 
-        public int StockQuantity { get; set; }
+        public int StockQuantity { get; set; } // Số lượng hàng tồn kho, phải là số nguyên dương
 
-        public string? ImageUrl { get; set; }
+        public string? ImageUrl { get; set; } // URL hình ảnh sản phẩm, có thể để trống
 
         // Khóa ngoại nối tới CategoryProduct 
 
-        public int CategoryProductId { get; set; }
+        public int CategoryProductId { get; set; } // Mỗi sản phẩm thuộc một danh mục, nên có khóa ngoại tới CategoryProduct
 
         [ForeignKey("CategoryProductId")]
 
-        public virtual CategoryProduct? CategoryProduct { get; set; }
+        public virtual CategoryProduct? CategoryProduct { get; set; } // Một sản phẩm thuộc một danh mục
 
     }
 

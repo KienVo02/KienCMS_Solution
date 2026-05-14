@@ -17,13 +17,12 @@ namespace CMS.Data.Entities
     public class Category
     {
 
-        public int Id { get; set; }
+        public int Id { get; set; } // Khóa chính, tự động tăng
         public string Name { get; set; } // Tên danh mục (vd: Tin Giáo Dục) 
-        public string Description { get; set; }
+        public string Description { get; set; } // Mô tả ngắn về danh mục (vd: Chuyên mục tin tức về giáo dục)
 
         // Quan hệ: Một danh mục có nhiều bài viết 
-
-        public virtual ICollection<Post> Posts { get; set; }
+        public virtual ICollection<Post> Posts { get; set; }// Một danh mục có thể có nhiều bài viết, nên có một tập hợp các bài viết liên quan
 
     }
 

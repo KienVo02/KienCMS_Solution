@@ -29,9 +29,9 @@ namespace CMS.Data.Entities
 
         // Khóa ngoại liên kết tới Category 
 
-        public int CategoryId { get; set; }
+        public int CategoryId { get; set; } // Id của danh mục mà bài viết thuộc về
 
-        public virtual Category Category { get; set; }
+        public virtual Category Category { get; set; } // Một bài viết thuộc một danh mục
 
     }
 

@@ -24,17 +24,17 @@ namespace CMS.Data.Entities
 
         public DateTime OrderDate { get; set; } = DateTime.Now;
 
-        public int CustomerId { get; set; }
+        public int CustomerId { get; set; } // Id của khách hàng đã đặt hàng
 
         public int Status { get; set; } // 0: Chờ duyệt, 1: Đang giao, 2: Đã xong 
 
-        public string? Notes { get; set; }
+        public string? Notes { get; set; } // Ghi chú thêm về đơn hàng (vd: Yêu cầu giao hàng nhanh)
 
         [ForeignKey("CustomerId")]
 
-        public virtual Customer? Customer { get; set; }
+        public virtual Customer? Customer { get; set; } // Một đơn hàng thuộc về một khách hàng cụ thể
 
-        public virtual ICollection<OrderDetail>? OrderDetails { get; set; }
+        public virtual ICollection<OrderDetail>? OrderDetails { get; set; } // Một đơn hàng có nhiều chi tiết đơn hàng (mỗi chi tiết tương ứng với một sản phẩm đã mua)
 
     }
 
