@@ -1,0 +1,32 @@
+﻿@model List<CMS.Data.Entities.OrderDetail>
+
+<h2>Danh sách chi tiết đơn hàng</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Mã đơn hàng</th>
+            <th>Sản phẩm</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+                <tr>
+                    <td>@item.Id</td>
+
+                    <td>@item.OrderId</td>
+
+                    <td>@item.Product?.Name</td>
+
+                    <td>@item.Quantity</td>
+
+                    <td>@item.UnitPrice VNĐ</td>
+                </tr>
+        }
+    </tbody>
+</table>
