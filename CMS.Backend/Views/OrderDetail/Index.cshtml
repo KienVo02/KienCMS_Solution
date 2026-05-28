@@ -1,8 +1,20 @@
 ﻿@model List<CMS.Data.Entities.OrderDetail>
 
-<h2>Danh sách chi tiết đơn hàng</h2>
+@{
+    Layout = "_LayoutAdmin";
+}
+
+<h2 class="text-primary">
+    DANH SÁCH CHI TIẾT ĐƠN HÀNG
+</h2>
+
+<a asp-action="Create" class="btn btn-success mb-3">
+    <i class="bi bi-plus-circle"></i>
+    Thêm chi tiết đơn hàng
+</a>
 
 <table class="table table-bordered">
+
     <thead>
         <tr>
             <th>ID</th>
@@ -10,13 +22,16 @@
             <th>Sản phẩm</th>
             <th>Số lượng</th>
             <th>Đơn giá</th>
+            <th style="width:150px">Thao tác</th>
         </tr>
     </thead>
 
     <tbody>
+
         @foreach (var item in Model)
         {
                 <tr>
+
                     <td>@item.Id</td>
 
                     <td>@item.OrderId</td>
@@ -26,7 +41,27 @@
                     <td>@item.Quantity</td>
 
                     <td>@item.UnitPrice VNĐ</td>
+
+                    <td>
+
+                        <a asp-action="Edit"
+                           asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-warning">
+                            Sửa
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Bạn có chắc muốn xóa không?')">
+                            Xóa
+                        </a>
+
+                    </td>
+
                 </tr>
         }
+
     </tbody>
+
 </table>

@@ -1,4 +1,5 @@
 ﻿using CMS.Data;
+using CMS.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Backend.Controllers
@@ -13,12 +14,82 @@ namespace CMS.Backend.Controllers
             _context = context;
         }
 
-        // Hiển thị danh sách thành viên
+        // ================= INDEX =================
+
         public IActionResult Index()
         {
             var users = _context.Users.ToList();
 
             return View(users);
+        }
+
+        // ================= CREATE =================
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Create(User model)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Users.Add(model);
+
+                _context.SaveChanges();
+
+                return RedirectToAction("Index");
+            }
+
+            return View(model);
+        }
+
+        // ================= EDIT =================
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var user = _context.Users.Find(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(User model)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Users.Update(model);
+
+                _context.SaveChanges();
+
+                return RedirectToAction("Index");
+            }
+
+            return View(model);
+        }
+
+        // ================= DELETE =================
+
+        public IActionResult Delete(int id)
+        {
+            var user = _context.Users.Find(id);
+
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

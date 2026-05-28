@@ -1,7 +1,7 @@
 ﻿using CMS.Data;
+using CMS.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace CMS.Backend.Controllers
 {
@@ -9,55 +9,106 @@ namespace CMS.Backend.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        // Constructor Injection
         public PostController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // Danh sách bài viết
+        // ================= INDEX =================
+
         public IActionResult Index()
         {
-            var posts = _context.Posts
-                                .Include(p => p.Category)
-                                .OrderByDescending(p => p.CreatedDate)
-                                .ToList();
+            // Lấy bài viết + Category
+            var data = _context.Posts
+                               .Include(p => p.Category)
+                               .ToList();
 
-            return View(posts);
+            return View(data);
         }
 
+        // ================= DETAILS =================
+
         public IActionResult Details(int id)
-
         {
-
-            // 1. Truy vấn bài viết theo ID 
-
-            // Sử dụng .Include(p => p.Category) để lấy kèm thông tin Danh mục (Join bảng) 
-
             var post = _context.Posts
-
-                .Include(p => p.Category)
-
-                .FirstOrDefault(p => p.Id == id);
-
-
-
-            // 2. Kiểm tra nếu không tìm thấy bài viết (tránh lỗi màn hình trắng) 
+                               .Include(p => p.Category)
+                               .FirstOrDefault(p => p.Id == id);
 
             if (post == null)
-
             {
-
-                return NotFound(); // Trả về trang lỗi 404 
-
+                return NotFound();
             }
 
+            return View(post);
+        }
 
+        // ================= CREATE =================
 
-            // 3. Truyền dữ liệu sang View 
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Create(Post model)
+        {
+            if (ModelState.IsValid == false)
+            {
+                return View(model);
+            }
+
+            _context.Posts.Add(model);
+
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
+
+        // ================= EDIT =================
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var post = _context.Posts.Find(id);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
 
             return View(post);
+        }
 
+        [HttpPost]
+        public IActionResult Edit(Post model)
+        {
+            if (ModelState.IsValid == false)
+            {
+                return View(model);
+            }
+
+            _context.Posts.Update(model);
+
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
+
+        // ================= DELETE =================
+
+        public IActionResult Delete(int id)
+        {
+            var post = _context.Posts.Find(id);
+
+            if (post != null)
+            {
+                _context.Posts.Remove(post);
+
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

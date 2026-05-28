@@ -1,0 +1,94 @@
+﻿@model CMS.Data.Entities.User
+
+@{
+    Layout = "_LayoutAdmin";
+}
+
+<div class="container mt-4">
+
+    <h2 class="text-warning">
+        CHỈNH SỬA THÀNH VIÊN
+    </h2>
+
+    <hr />
+
+    <form asp-action="Edit" method="post">
+
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+
+            <label class="form-label fw-bold">
+                Họ tên:
+            </label>
+
+            <input asp-for="FullName"
+                   class="form-control" />
+
+            <span asp-validation-for="FullName"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label fw-bold">
+                Tên đăng nhập:
+            </label>
+
+            <input asp-for="Username"
+                   class="form-control" />
+
+            <span asp-validation-for="Username"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label fw-bold">
+                Mật khẩu:
+            </label>
+
+            <input asp-for="PasswordHash"
+                   type="password"
+                   class="form-control" />
+
+            <span asp-validation-for="PasswordHash"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label fw-bold">
+                Vai trò:
+            </label>
+
+            <input asp-for="Role"
+                   class="form-control" />
+
+            <span asp-validation-for="Role"
+                  class="text-danger"></span>
+
+        </div>
+
+        <button type="submit"
+                class="btn btn-warning">
+            Cập nhật
+        </button>
+
+        <a asp-action="Index"
+           class="btn btn-secondary">
+            Hủy
+        </a>
+
+    </form>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
