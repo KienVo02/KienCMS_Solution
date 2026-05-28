@@ -5,34 +5,30 @@
  * Version 1.0
  **/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace CMS.Data.Entities
 {
-
     public class Post
     {
-
         public int Id { get; set; }
 
-        public string Title { get; set; } // Tiêu đề bài viết 
+        [Required(ErrorMessage = "Vui lòng nhập tiêu đề")]
+        public string? Title { get; set; }
 
-        public string Content { get; set; } // Nội dung chi tiết 
+        [Required(ErrorMessage = "Vui lòng nhập nội dung")]
+        public string? Content { get; set; }
 
-        public string ImageUrl { get; set; } // Hình ảnh đại diện 
+        // Ảnh có thể null
+        public string? ImageUrl { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
-        // Khóa ngoại liên kết tới Category 
+        // Foreign Key
+        [Required(ErrorMessage = "Vui lòng chọn danh mục")]
+        public int CategoryId { get; set; }
 
-        public int CategoryId { get; set; } // Id của danh mục mà bài viết thuộc về
-
-        public virtual Category Category { get; set; } // Một bài viết thuộc một danh mục
-
+        // Navigation Property
+        public virtual Category? Category { get; set; }
     }
-
 }
