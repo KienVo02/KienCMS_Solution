@@ -1,8 +1,20 @@
 ﻿@model List<CMS.Data.Entities.Customer>
 
-<h2>Danh sách khách hàng</h2>
+@{
+    Layout = "_LayoutAdmin";
+}
+
+<h2 class="text-primary">
+    DANH SÁCH KHÁCH HÀNG
+</h2>
+
+<a asp-action="Create" class="btn btn-success mb-3">
+    <i class="bi bi-plus-circle"></i>
+    Thêm khách hàng mới
+</a>
 
 <table class="table table-bordered">
+
     <thead>
         <tr>
             <th>ID</th>
@@ -10,13 +22,16 @@
             <th>Email</th>
             <th>Số điện thoại</th>
             <th>Địa chỉ</th>
+            <th style="width:150px">Thao tác</th>
         </tr>
     </thead>
 
     <tbody>
+
         @foreach (var item in Model)
         {
                 <tr>
+
                     <td>@item.Id</td>
 
                     <td>@item.FullName</td>
@@ -26,7 +41,27 @@
                     <td>@item.Phone</td>
 
                     <td>@item.Address</td>
+
+                    <td>
+
+                        <a asp-action="Edit"
+                           asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-warning">
+                            Sửa
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Bạn có chắc muốn xóa khách hàng này?')">
+                            Xóa
+                        </a>
+
+                    </td>
+
                 </tr>
         }
+
     </tbody>
+
 </table>

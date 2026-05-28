@@ -1,10 +1,26 @@
 ﻿@model IEnumerable<CMS.Data.Entities.Post>
 
+@{
+    Layout = "_LayoutAdmin";
+}
+
 <div class="container mt-4">
 
-    <h2 class="mb-4 text-danger">
-        DANH SÁCH BÀI VIẾT MỚI NHẤT
-    </h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="text-danger">
+            DANH SÁCH BÀI VIẾT
+        </h2>
+
+        <a asp-action="Create"
+           class="btn btn-success">
+
+            <i class="bi bi-plus-circle"></i>
+            Thêm bài viết
+
+        </a>
+
+    </div>
 
     <div class="row">
 
@@ -12,10 +28,11 @@
         {
                 <div class="col-md-4 mb-3">
 
-                    <div class="card shadow-sm">
+                    <div class="card shadow-sm h-100">
 
                         <img src="@item.ImageUrl"
                              class="card-img-top"
+                             style="height:220px; object-fit:cover;"
                              alt="Thumbnail">
 
                         <div class="card-body">
@@ -24,7 +41,7 @@
                             @item.Category.Name
                             </span>
 
-                            <h5 class="card-title text-primary">
+                            <h5 class="card-title text-primary mt-2">
                             @item.Title
                             </h5>
 
@@ -37,10 +54,28 @@
                             @item.CreatedDate.ToString("dd/MM/yyyy")
                             </p>
 
-                            <a href="/Post/Details/@item.Id"
-                               class="btn btn-outline-primary btn-sm">
-                                Xem chi tiết
-                            </a>
+                            <div class="d-flex gap-2">
+
+                                <a asp-action="Details"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-outline-primary btn-sm">
+                                    Chi tiết
+                                </a>
+
+                                <a asp-action="Edit"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-outline-warning btn-sm">
+                                    Sửa
+                                </a>
+
+                                <a asp-action="Delete"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-outline-danger btn-sm"
+                                   onclick="return confirm('Bạn có chắc muốn xóa bài viết này?')">
+                                    Xóa
+                                </a>
+
+                            </div>
 
                         </div>
 

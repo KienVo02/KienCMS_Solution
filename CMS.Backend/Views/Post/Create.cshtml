@@ -2,173 +2,107 @@
 
 @{
     Layout = "_LayoutAdmin";
-    ViewData["Title"] = "Thêm bài viết mới";
 }
 
 <div class="container mt-4">
 
-    <div class="card shadow">
+    <h2 class="text-primary">
+        THÊM BÀI VIẾT MỚI
+    </h2>
 
-        <div class="card-header bg-primary text-white">
+    <hr />
 
-            <h4 class="mb-0">
-                <i class="bi bi-file-earmark-plus"></i>
-                THÊM BÀI VIẾT MỚI
-            </h4>
+    <form asp-action="Create" method="post">
 
-        </div>
+        <div class="mb-3">
 
-        <div class="card-body">
+            <label asp-for="Title"
+                   class="form-label fw-bold">
+            </label>
 
-            <div asp-validation-summary="All"
-                 class="text-danger mb-3"></div>
+            <input asp-for="Title"
+                   class="form-control" />
 
-            <form asp-action="Create"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <div class="row">
-
-                    <div class="col-md-8">
-
-                        <!-- TITLE -->
-                        <div class="mb-3">
-
-                            <label class="form-label fw-bold">
-                                Tiêu đề bài viết:
-                            </label>
-
-                            <input asp-for="Title"
-                                   class="form-control"
-                                   placeholder="Nhập tiêu đề..." />
-
-                            <span asp-validation-for="Title"
-                                  class="text-danger"></span>
-
-                        </div>
-
-                        <!-- CONTENT -->
-                        <div class="mb-3">
-
-                            <label class="form-label fw-bold">
-                                Nội dung chi tiết:
-                            </label>
-
-                            <textarea asp-for="Content"
-                                      id="Content"
-                                      class="form-control"
-                                      rows="10"
-                                      placeholder="Viết nội dung tại đây..."></textarea>
-
-                            <span asp-validation-for="Content"
-                                  class="text-danger"></span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-4">
-
-                        <!-- CATEGORY -->
-                        <div class="mb-3">
-
-                            <label class="form-label fw-bold">
-                                Chuyên mục:
-                            </label>
-
-                            <select asp-for="CategoryId"
-                                    class="form-select"
-                                    asp-items="ViewBag.CategoryList">
-
-                                <option value="">
-                                    -- Chọn danh mục --
-                                </option>
-
-                            </select>
-
-                            <span asp-validation-for="CategoryId"
-                                  class="text-danger"></span>
-
-                        </div>
-
-                        <!-- UPLOAD IMAGE -->
-                        <div class="mb-3">
-
-                            <label class="form-label fw-bold">
-                                Chọn ảnh đại diện:
-                            </label>
-
-                            <input type="file"
-                                   name="uploadImage"
-                                   class="form-control" />
-
-                        </div>
-
-                        <!-- CREATED DATE -->
-                        <div class="mb-3">
-
-                            <label class="form-label fw-bold">
-                                Ngày đăng:
-                            </label>
-
-                            <input asp-for="CreatedDate"
-                                   type="date"
-                                   class="form-control"
-                                   value="@DateTime.Now.ToString("yyyy-MM-dd")" />
-
-                        </div>
-
-                        <hr />
-
-                        <div class="d-grid gap-2">
-
-                            <button type="submit"
-                                    class="btn btn-success">
-
-                                <i class="bi bi-cloud-arrow-up"></i>
-                                Lưu và Đăng bài
-
-                            </button>
-
-                            <a asp-action="Index"
-                               class="btn btn-secondary">
-
-                                <i class="bi bi-arrow-left"></i>
-                                Quay lại danh sách
-
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </form>
+            <span asp-validation-for="Title"
+                  class="text-danger"></span>
 
         </div>
 
-    </div>
+        <div class="mb-3">
+
+            <label asp-for="Content"
+                   class="form-label fw-bold">
+            </label>
+
+            <textarea asp-for="Content"
+                      class="form-control"
+                      rows="5"></textarea>
+
+            <span asp-validation-for="Content"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label asp-for="ImageUrl"
+                   class="form-label fw-bold">
+            </label>
+
+            <input asp-for="ImageUrl"
+                   class="form-control" />
+
+            <span asp-validation-for="ImageUrl"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label asp-for="CategoryId"
+                   class="form-label fw-bold">
+            </label>
+
+            <input asp-for="CategoryId"
+                   type="number"
+                   class="form-control" />
+
+            <span asp-validation-for="CategoryId"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label asp-for="CreatedDate"
+                   class="form-label fw-bold">
+            </label>
+
+            <input asp-for="CreatedDate"
+                   type="datetime-local"
+                   class="form-control" />
+
+            <span asp-validation-for="CreatedDate"
+                  class="text-danger"></span>
+
+        </div>
+
+        <button type="submit"
+                class="btn btn-success">
+            Lưu vào hệ thống
+        </button>
+
+        <a asp-action="Index"
+           class="btn btn-secondary">
+            Hủy bỏ
+        </a>
+
+    </form>
 
 </div>
 
 @section Scripts {
-
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
-        <!-- CKEDITOR -->
-        <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-
-        <script>
-
-            ClassicEditor
-                .create(document.querySelector('#Content'))
-                .catch(error => {
-                    console.error(error);
-                });
-
-        </script>
-
 }

@@ -1,4 +1,4 @@
-﻿@model CMS.Data.Entities.User
+﻿@model CMS.Data.Entities.Customer
 
 @{
     Layout = "_LayoutAdmin";
@@ -7,7 +7,7 @@
 <div class="container mt-4">
 
     <h2 class="text-success">
-        THÊM THÀNH VIÊN
+        THÊM KHÁCH HÀNG
     </h2>
 
     <hr />
@@ -20,8 +20,7 @@
                 Họ tên:
             </label>
 
-            <input asp-for="FullName"
-                   class="form-control" />
+            <input asp-for="FullName" class="form-control" />
 
             <span asp-validation-for="FullName"
                   class="text-danger"></span>
@@ -31,13 +30,40 @@
         <div class="mb-3">
 
             <label class="form-label fw-bold">
-                Tên đăng nhập:
+                Email:
             </label>
 
-            <input asp-for="Username"
-                   class="form-control" />
+            <input asp-for="Email" class="form-control" />
 
-            <span asp-validation-for="Username"
+            <span asp-validation-for="Email"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label fw-bold">
+                Số điện thoại:
+            </label>
+
+            <input asp-for="Phone" class="form-control" />
+
+            <span asp-validation-for="Phone"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label fw-bold">
+                Địa chỉ:
+            </label>
+
+            <textarea asp-for="Address"
+                      class="form-control"
+                      rows="3"></textarea>
+
+            <span asp-validation-for="Address"
                   class="text-danger"></span>
 
         </div>
@@ -48,36 +74,20 @@
                 Mật khẩu:
             </label>
 
-            <input asp-for="PasswordHash"
+            <input asp-for="Password"
                    type="password"
                    class="form-control" />
 
-            <span asp-validation-for="PasswordHash"
+            <span asp-validation-for="Password"
                   class="text-danger"></span>
 
         </div>
 
-        <div class="mb-3">
-
-            <label class="form-label fw-bold">
-                Vai trò:
-            </label>
-
-            <input asp-for="Role"
-                   class="form-control" />
-
-            <span asp-validation-for="Role"
-                  class="text-danger"></span>
-
-        </div>
-
-        <button type="submit"
-                class="btn btn-success">
+        <button type="submit" class="btn btn-success">
             Thêm mới
         </button>
 
-        <a asp-action="Index"
-           class="btn btn-secondary">
+        <a asp-action="Index" class="btn btn-secondary">
             Quay lại
         </a>
 
@@ -89,4 +99,4 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-}s
+}

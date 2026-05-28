@@ -1,46 +1,42 @@
-﻿/*
- * Sinh Vien: Vo Trung Kien
- * Ma SV: 2123110044
- * Ngay Tao: 14/5/2026
- * Version 1.0
- **/
+﻿using System.ComponentModel.DataAnnotations;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.ComponentModel.DataAnnotations;
 namespace CMS.Data.Entities
-
 {
-    // Khách hàng 
+    // Khách hàng
     public class Customer
-
     {
         [Key]
-        public int Id { get; set; } // Khóa chính, tự động tăng
+        public int Id { get; set; }
 
-        [Required]
-        public string FullName { get; set; } // Họ và tên đầy đủ của khách hàng
+        // ================= FULL NAME =================
 
-        [Required]
+        [Required(ErrorMessage = "Họ tên không được để trống")]
+        public string FullName { get; set; }
 
-        [EmailAddress]
+        // ================= EMAIL =================
 
-        public string Email { get; set; } // Địa chỉ email của khách hàng, phải là duy nhất
+        [Required(ErrorMessage = "Email không được để trống")]
 
-        public string? Phone { get; set; }// Số điện thoại của khách hàng, có thể để trống
+        [EmailAddress(ErrorMessage = "Email không đúng định dạng")]
+        public string Email { get; set; }
 
-        public string? Address { get; set; } // Địa chỉ của khách hàng, có thể để trống
+        // ================= PHONE =================
 
-        [Required]
+        [Required(ErrorMessage = "Số điện thoại không được để trống")]
+        public string? Phone { get; set; }
 
-        public string Password { get; set; } // Lưu mật khẩu thô theo yêu cầu tối giản 
+        // ================= ADDRESS =================
 
-        public virtual ICollection<Order>? Orders { get; set; } // Một khách hàng có thể có nhiều đơn hàng
+        [Required(ErrorMessage = "Địa chỉ không được để trống")]
+        public string? Address { get; set; }
 
+        // ================= PASSWORD =================
+
+        [Required(ErrorMessage = "Mật khẩu không được để trống")]
+        public string Password { get; set; }
+
+        // ================= RELATIONSHIP =================
+
+        public virtual ICollection<Order>? Orders { get; set; }
     }
-
 }

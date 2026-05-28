@@ -1,4 +1,4 @@
-﻿@model CMS.Data.Entities.User
+﻿@model CMS.Data.Entities.OrderDetail
 
 @{
     Layout = "_LayoutAdmin";
@@ -7,7 +7,7 @@
 <div class="container mt-4">
 
     <h2 class="text-warning">
-        CHỈNH SỬA THÀNH VIÊN
+        CHỈNH SỬA CHI TIẾT ĐƠN HÀNG
     </h2>
 
     <hr />
@@ -19,57 +19,50 @@
         <div class="mb-3">
 
             <label class="form-label fw-bold">
-                Họ tên:
+                Đơn hàng:
             </label>
 
-            <input asp-for="FullName"
-                   class="form-control" />
+            <select asp-for="OrderId"
+                    asp-items="ViewBag.Orders"
+                    class="form-select">
 
-            <span asp-validation-for="FullName"
-                  class="text-danger"></span>
+            </select>
 
         </div>
 
         <div class="mb-3">
 
             <label class="form-label fw-bold">
-                Tên đăng nhập:
+                Sản phẩm:
             </label>
 
-            <input asp-for="Username"
-                   class="form-control" />
+            <select asp-for="ProductId"
+                    asp-items="ViewBag.Products"
+                    class="form-select">
 
-            <span asp-validation-for="Username"
-                  class="text-danger"></span>
+            </select>
 
         </div>
 
         <div class="mb-3">
 
             <label class="form-label fw-bold">
-                Mật khẩu:
+                Số lượng:
             </label>
 
-            <input asp-for="PasswordHash"
-                   type="password"
+            <input asp-for="Quantity"
                    class="form-control" />
-
-            <span asp-validation-for="PasswordHash"
-                  class="text-danger"></span>
 
         </div>
 
         <div class="mb-3">
 
             <label class="form-label fw-bold">
-                Vai trò:
+                Đơn giá:
             </label>
 
-            <input asp-for="Role"
+            <input asp-for="UnitPrice"
                    class="form-control" />
-
-            <span asp-validation-for="Role"
-                  class="text-danger"></span>
 
         </div>
 
@@ -86,9 +79,3 @@
     </form>
 
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}

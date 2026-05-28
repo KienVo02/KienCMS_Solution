@@ -1,4 +1,4 @@
-﻿@model CMS.Data.Entities.User
+﻿@model CMS.Data.Entities.Product
 
 @{
     Layout = "_LayoutAdmin";
@@ -7,7 +7,7 @@
 <div class="container mt-4">
 
     <h2 class="text-success">
-        THÊM THÀNH VIÊN
+        THÊM SẢN PHẨM
     </h2>
 
     <hr />
@@ -15,60 +15,63 @@
     <form asp-action="Create" method="post">
 
         <div class="mb-3">
-
             <label class="form-label fw-bold">
-                Họ tên:
+                Tên sản phẩm:
             </label>
 
-            <input asp-for="FullName"
-                   class="form-control" />
+            <input asp-for="Name" class="form-control" />
 
-            <span asp-validation-for="FullName"
+            <span asp-validation-for="Name"
                   class="text-danger"></span>
-
         </div>
 
         <div class="mb-3">
-
             <label class="form-label fw-bold">
-                Tên đăng nhập:
+                Mô tả:
             </label>
 
-            <input asp-for="Username"
-                   class="form-control" />
-
-            <span asp-validation-for="Username"
-                  class="text-danger"></span>
-
+            <textarea asp-for="Description"
+                      class="form-control"
+                      rows="3"></textarea>
         </div>
 
         <div class="mb-3">
-
             <label class="form-label fw-bold">
-                Mật khẩu:
+                Giá:
             </label>
 
-            <input asp-for="PasswordHash"
-                   type="password"
+            <input asp-for="Price"
                    class="form-control" />
 
-            <span asp-validation-for="PasswordHash"
+            <span asp-validation-for="Price"
                   class="text-danger"></span>
-
         </div>
 
         <div class="mb-3">
-
             <label class="form-label fw-bold">
-                Vai trò:
+                Số lượng:
             </label>
 
-            <input asp-for="Role"
+            <input asp-for="StockQuantity"
                    class="form-control" />
+        </div>
 
-            <span asp-validation-for="Role"
-                  class="text-danger"></span>
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                Hình ảnh:
+            </label>
 
+            <input asp-for="ImageUrl"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                ID Danh mục:
+            </label>
+
+            <input asp-for="CategoryProductId"
+                   class="form-control" />
         </div>
 
         <button type="submit"
@@ -89,4 +92,4 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-}s
+}
