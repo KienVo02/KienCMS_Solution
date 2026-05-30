@@ -4,6 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Backend.Controllers
 {
+    using Microsoft.AspNetCore.Authorization; // Cần thêm namespace này 
+
+
+
+    [Authorize(Roles = "Admin")] // Chỉ tài khoản có Role là Admin mới được phép vào 
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _context;
