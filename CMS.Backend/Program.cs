@@ -1,68 +1,90 @@
 using Microsoft.EntityFrameworkCore;
-
 using CMS.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.OpenApi;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ======================================================
+// 1. KHU V?C ÐÃNG K? D?CH V? - SERVICES CONTAINER
+// ======================================================
+
+// V?a nh?n di?n Controller API, v?a gi? View MVC c?
 builder.Services.AddControllersWithViews();
-// Ðãng k? DbContext vào h? th?ng 
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-// 1. Khai báo d?ch v? xác th?c Cookie 
-
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-
-    .AddCookie(options =>
-
+// Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
-
-        options.LoginPath = "/Account/Login"; // Ðý?ng d?n n?u chýa ðãng nh?p 
-
-        options.AccessDeniedPath = "/Account/AccessDenied"; // Ðý?ng d?n n?u vào trang không ðý?c phép 
-
+        Title = "ThaiCMS Web API",
+        Version = "v1"
     });
-// 1. Khai báo chính sách CORS 
-
-builder.Services.AddCors(options => {
-
-    options.AddPolicy("AllowAll", policy => {
-
-        // Cho phép m?i ngu?n (Origin), m?i phýõng th?c (GET, POST...), m?i tiêu ð? (Header) 
-
-        policy.AllowAnyOrigin()
-
-              .AllowAnyMethod()
-
-              .AllowAnyHeader();
-
-    });
-
 });
+
+// Ðãng k? DbContext
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Khai báo xác th?c Cookie
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
+
+// Khai báo chính sách CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ======================================================
+// 2. KHU V?C C?U H?NH MIDDLEWARE - REQUEST PIPELINE
+// ======================================================
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-    app.UseSwagger();
-    app.UseSwaggerUI();
 }
+
+// Swagger nên ð?t ngoài if ð? ch?y ðý?c c? Development và Production
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ThaiCMS Web API v1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-// 2. Kích ho?t chính sách CORS ð? khai báo ? trên 
 
+// CORS ph?i n?m sau UseRouting và trý?c Authentication / Authorization
 app.UseCors("AllowAll");
-app.UseAuthentication(); // BÝ?C A: Xác nh?n "Anh là ai?" (Ki?m tra th? bài) 
+
+app.UseAuthentication();
 app.UseAuthorization();
 
+// ======================================================
+// 3. KHU V?C Ð?NH TUY?N PHÂN LU?NG - ROUTING MAP
+// ======================================================
+
+// Phân lu?ng A: API Controller d?ng /api/[controller]
+app.MapControllers();
+
+// Phân lu?ng B: MVC Controller c?
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
