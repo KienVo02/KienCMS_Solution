@@ -12,9 +12,12 @@
 
     <hr />
 
-    <form asp-action="Edit" method="post">
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
         <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImageUrl" />
 
         <div class="mb-3">
 
@@ -47,15 +50,33 @@
 
         <div class="mb-3">
 
-            <label asp-for="ImageUrl"
-                   class="form-label fw-bold">
+            <label class="form-label fw-bold">
+                Ảnh hiện tại
             </label>
 
-            <input asp-for="ImageUrl"
-                   class="form-control" />
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                    <div class="mb-2">
+                        <img src="@Model.ImageUrl"
+                             width="180"
+                             class="img-thumbnail" />
+                    </div>
+            }
+            else
+            {
+                    <div class="text-muted mb-2">
+                        Chưa có ảnh
+                    </div>
+            }
 
-            <span asp-validation-for="ImageUrl"
-                  class="text-danger"></span>
+            <label class="form-label fw-bold">
+                Chọn ảnh mới nếu muốn thay đổi
+            </label>
+
+            <input type="file"
+                   name="imageFile"
+                   class="form-control"
+                   accept="image/*" />
 
         </div>
 
@@ -82,6 +103,7 @@
 
             <input asp-for="CreatedDate"
                    type="datetime-local"
+                   asp-format="{0:yyyy-MM-ddTHH:mm}"
                    class="form-control" />
 
             <span asp-validation-for="CreatedDate"

@@ -1,44 +1,37 @@
-import React from "react";
-import CategoryProductList from "./components/CategoryProductList";
-import "./App.css";
+﻿// Họ và tên: Võ Trung Kiên - MSSV: 2123110044
+// Chức năng: Giao diện tổng thể hoàn thiện Buổi 7 - Tích hợp Real-time Sản phẩm và Blog Tin tức
+import React from 'react';
+import CategoryProductList from './components/CategoryProductList';
+import ProductList from './components/ProductList';
+import PostList from './components/PostList'; // BỔ SUNG: Import component Tin tức vào đây
+import './App.css';
 
 function App() {
     return (
         <div className="container mt-5">
-            {/* Ph?n Header c?a Website */}
+            {/* Phần Header của Website */}
             <header className="pb-3 mb-4 border-bottom">
-                <span className="fs-4 fw-bold text-dark text-uppercase">
-                    ?? H? TH?NG C?A H�NG TR?C TUY?N - THAICMS RETAIL
+                <span className="fs-4 font-weight-bold text-dark text-uppercase">
+                    🛒 HỆ THỐNG CỬA HÀNG TRỰC TUYẾN - KIENCMS RETAIL
                 </span>
             </header>
 
             <div className="row">
-                {/* C?t b�n tr�i: Hi?n th? b? l?c danh m?c s?n ph?m */}
+                {/* Cột bên trái (Sidebar): Bộ lọc danh mục sản phẩm */}
                 <div className="col-md-3">
                     <CategoryProductList />
                 </div>
 
-                {/* C?t b�n ph?i: N?i dung ch�nh */}
+                {/* Cột bên phải (Main Content): Hiển thị đồng thời Sản phẩm và Xu hướng phối đồ */}
                 <div className="col-md-9">
-                    <div className="jumbotron bg-light border p-5 rounded shadow-sm">
-                        <h2 className="display-5 fw-normal">
-                            Ch�o m?ng �?n v?i kh�ng gian tr?i nghi?m!
-                        </h2>
+                    {/* KHU VỰC 1: SẢN PHẨM THỜI TRANG */}
+                    <h4 className="mb-4 text-uppercase text-secondary font-weight-bold">
+                        <i className="fa-solid fa-shirt text-success mr-2"></i>Bộ sưu tập mới nhất
+                    </h4>
+                    <ProductList />
 
-                        <p className="lead mt-3 text-secondary">
-                            Kh?i d? li?u b�n thanh �i?u h�?ng tr�i �ang ��?c t?i{" "}
-                            <strong>Real-time</strong> tr?c ti?p t? b?ng{" "}
-                            <strong>CategoryProduct</strong> trong Database SQL Server th�ng
-                            qua n?n t?ng ASP.NET Core Web API (.NET 8.0).
-                        </p>
-
-                        <hr className="my-4" />
-
-                        <p className="text-muted">
-                            H?y �?m b?o r?ng b?n �? k�ch ho?t CORS ? Backend �? d? li?u kh�ng
-                            b? ch?n hi?n th?.
-                        </p>
-                    </div>
+                    {/* KHU VỰC 2: BLOG & TIN TỨC (BỔ SUNG ĐỂ HOÀN THÀNH 100% BUỔI 7) */}
+                    <PostList />
                 </div>
             </div>
         </div>
