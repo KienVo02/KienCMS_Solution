@@ -8,11 +8,12 @@ namespace CMS.Backend.Controllers
     public class ProductController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        // Constructor Injection
-        public ProductController(ApplicationDbContext context)
+        public ProductController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // ================= INDEX =================
@@ -26,6 +27,34 @@ namespace CMS.Backend.Controllers
             return View(products);
         }
 
+        // ================= HÀM LƯU ẢNH =================
+
+        private async Task<string?> SaveImageAsync(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+            {
+                return null;
+            }
+
+            var uploadFolder = Path.Combine(_webHostEnvironment.WebRootPath, "img", "products");
+
+            if (!Directory.Exists(uploadFolder))
+            {
+                Directory.CreateDirectory(uploadFolder);
+            }
+
+            var extension = Path.GetExtension(imageFile.FileName);
+            var fileName = Guid.NewGuid().ToString() + extension;
+            var filePath = Path.Combine(uploadFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return "/img/products/" + fileName;
+        }
+
         // ================= CREATE =================
 
         [HttpGet]
@@ -35,13 +64,22 @@ namespace CMS.Backend.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Product model)
+        public async Task<IActionResult> Create(Product model, IFormFile? imageFile)
         {
+            ModelState.Remove("ImageUrl");
+            ModelState.Remove("CategoryProduct");
+
+            var imageUrl = await SaveImageAsync(imageFile);
+
+            if (imageUrl != null)
+            {
+                model.ImageUrl = imageUrl;
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Products.Add(model);
-
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
                 return RedirectToAction("Index");
             }
@@ -65,18 +103,39 @@ namespace CMS.Backend.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(Product model)
+        public async Task<IActionResult> Edit(Product model, IFormFile? imageFile)
         {
-            if (ModelState.IsValid)
+            ModelState.Remove("ImageUrl");
+            ModelState.Remove("CategoryProduct");
+
+            if (!ModelState.IsValid)
             {
-                _context.Products.Update(model);
-
-                _context.SaveChanges();
-
-                return RedirectToAction("Index");
+                return View(model);
             }
 
-            return View(model);
+            var product = await _context.Products.FindAsync(model.Id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            product.Name = model.Name;
+            product.Description = model.Description;
+            product.Price = model.Price;
+            product.StockQuantity = model.StockQuantity;
+            product.CategoryProductId = model.CategoryProductId;
+
+            var imageUrl = await SaveImageAsync(imageFile);
+
+            if (imageUrl != null)
+            {
+                product.ImageUrl = imageUrl;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
         }
 
         // ================= DELETE =================
@@ -88,7 +147,6 @@ namespace CMS.Backend.Controllers
             if (product != null)
             {
                 _context.Products.Remove(product);
-
                 _context.SaveChanges();
             }
 

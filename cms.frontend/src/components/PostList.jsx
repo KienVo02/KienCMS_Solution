@@ -1,91 +1,205 @@
 ﻿import React, { useState, useEffect } from 'react';
 import blogService from '../services/blogService';
 
-const PostList = () => {
-    // 1. Khai báo State chứa mảng bài viết lấy từ SQL Server
+const PostList = ({ limit = 3 }) => {
     const [posts, setPosts] = useState([]);
-
-    // Khai báo State quản lý trạng thái chờ (Loading) nhằm tối ưu trải nghiệm người dùng
     const [loading, setLoading] = useState(true);
 
-    // 2. Sử dụng useEffect để kiểm soát vòng đời gọi dữ liệu
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [detailLoading, setDetailLoading] = useState(false);
+
+    const API_HOST = 'https://localhost:7204';
+
+    const getImageUrl = (imageUrl) => {
+        if (!imageUrl) {
+            return '';
+        }
+
+        if (imageUrl.startsWith('http')) {
+            return imageUrl;
+        }
+
+        if (imageUrl.startsWith('/')) {
+            return API_HOST + imageUrl;
+        }
+
+        return API_HOST + '/img/' + imageUrl;
+    };
+
+    const stripHtml = (html) => {
+        if (!html) {
+            return '';
+        }
+
+        return html.replace(/<[^>]*>?/gm, '');
+    };
+
     useEffect(() => {
-        // Viết hàm bất đồng bộ để đợi dữ liệu từ Server truyền về
         const fetchPosts = async () => {
             try {
-                setLoading(true); // Bắt đầu tải
+                setLoading(true);
 
-                // Gọi sang lớp Service để kích hoạt Axios lấy dữ liệu JSON
                 const data = await blogService.getAllPosts();
 
-                // Nạp cục dữ liệu JSON vừa lấy vào State 'posts'
-                setPosts(data);
+                const newestPosts = data
+                    .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
+                    .slice(0, limit);
+
+                setPosts(newestPosts);
             } catch (error) {
-                console.error("Quá trình kết nối API bài viết thất bại:", error);
+                console.error("Lỗi khi tải bài viết:", error);
             } finally {
-                setLoading(false); // Kết thúc tải dữ liệu (Dù thành công hay thất bại)
+                setLoading(false);
             }
         };
 
-        // Kích hoạt hàm thực thi
         fetchPosts();
-    }, []); // Mảng rỗng [] ở đây cực kỳ quan trọng: Đảm bảo API chỉ gọi 1 LẦN DUY NHẤT khi mở trang
+    }, [limit]);
 
-    // 3. Xử lý trạng thái hiển thị giao diện tạm thời
+    const handleViewDetail = async (id) => {
+        try {
+            setDetailLoading(true);
+
+            const data = await blogService.getPostById(id);
+
+            setSelectedPost(data);
+        } catch (error) {
+            console.error("Lỗi khi tải chi tiết bài viết:", error);
+            alert("Không thể tải chi tiết bài viết. Kiểm tra API /Posts/{id}");
+        } finally {
+            setDetailLoading(false);
+        }
+    };
+
+    const closeDetail = () => {
+        setSelectedPost(null);
+    };
+
     if (loading) {
         return (
             <div className="text-center my-5">
-                <div className="spinner-border text-info" role="status"></div>
-                <p className="mt-2 text-muted">Đang kết nối Database lấy tin tức thời trang...</p>
+                <div className="spinner-border text-success" role="status"></div>
+                <p className="mt-2 text-muted">Đang tải tin tức...</p>
             </div>
         );
     }
 
-    // 4. Render giao diện HTML/Bootstrap khi đã có dữ liệu thành công
     return (
-        <div className="card shadow-sm p-4 bg-white rounded">
-            <h4 className="card-title text-uppercase font-weight-bold text-dark border-bottom pb-3 mb-4">
-                <i className="fa-solid fa-newspaper mr-2 text-info"></i> Xu hướng & Bí quyết mặc đẹp
-            </h4>
+        <>
+            <div className="row">
+                {posts.length === 0 ? (
+                    <div className="col-12">
+                        <div className="alert alert-light border text-center">
+                            Chưa có bài viết tin tức nào.
+                        </div>
+                    </div>
+                ) : (
+                    posts.map((item) => (
+                        <div className="col-lg-4 col-md-6 mb-4" key={item.id}>
+                            <div className="hotfood-post-card">
+                                <div className="post-img-box">
+                                    {item.imageUrl ? (
+                                        <img
+                                            src={getImageUrl(item.imageUrl)}
+                                            alt={item.title}
+                                        />
+                                    ) : (
+                                        <div className="no-image">
+                                            Chưa có hình bài viết
+                                        </div>
+                                    )}
+                                </div>
 
-            {posts.length === 0 ? (
-                <div className="alert alert-light text-center border">
-                    <p className="text-muted m-0">Hiện tại chưa có bài viết xu hướng nào trong hệ thống.</p>
-                </div>
-            ) : (
-                <div className="row">
-                    {posts.map((item) => (
-                        <div className="col-12 mb-4" key={item.id}>
-                            <div className="card h-100 border-0 shadow-sm bg-light">
-                                <div className="card-body">
-                                    <h5 className="font-weight-bold">
-                                        <a href={`/post/${item.id}`} className="text-dark text-decoration-none text-hover-primary">
-                                            {item.title}
-                                        </a>
-                                    </h5>
+                                <div className="post-content">
+                                    <span className="post-category">
+                                        Tin HOTFOOD
+                                    </span>
 
-                                    {/* Hiển thị đoạn mô tả ngắn trích dẫn */}
-                                    <p className="text-secondary small mt-2 card-text-truncate">
-                                        {item.shortDescription || 'Nhấn để xem chi tiết bài viết chia sẻ về xu hướng phối đồ công sở...'}
+                                    <h5>{item.title}</h5>
+
+                                    <p>
+                                        {
+                                            stripHtml(item.shortDescription || item.description || item.content)
+                                                .substring(0, 90)
+                                        }
+                                        ...
                                     </p>
 
-                                    <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-light text-muted small">
+                                    <div className="post-footer">
                                         <span>
-                                            <i className="fa-regular fa-calendar-days mr-1 text-secondary"></i>
-                                            {/* Định dạng lại chuỗi DateTime thô của SQL thành ngày thuần Việt */}
+                                            <i className="fa-regular fa-calendar mr-1"></i>
                                             {new Date(item.createdDate).toLocaleDateString('vi-VN')}
                                         </span>
-                                        <span className="badge badge-pill badge-info px-3 py-2 cursor-pointer">
-                                            Đọc tiếp <i className="fa-solid fa-angle-right ml-1"></i>
-                                        </span>
+
+                                        <button
+                                            type="button"
+                                            className="post-read-btn"
+                                            onClick={() => handleViewDetail(item.id)}
+                                        >
+                                            Đọc tiếp
+                                            <i className="fa-solid fa-arrow-right ml-1"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    ))
+                )}
+            </div>
+
+            {detailLoading && (
+                <div className="post-detail-backdrop">
+                    <div className="post-detail-box text-center">
+                        <div className="spinner-border text-warning" role="status"></div>
+                        <p className="mt-3 mb-0">Đang tải chi tiết bài viết...</p>
+                    </div>
                 </div>
             )}
-        </div>
+
+            {selectedPost && (
+                <div className="post-detail-backdrop">
+                    <div className="post-detail-box">
+                        <button
+                            type="button"
+                            className="close-detail-btn"
+                            onClick={closeDetail}
+                        >
+                            ×
+                        </button>
+
+                        {selectedPost.imageUrl && (
+                            <img
+                                src={getImageUrl(selectedPost.imageUrl)}
+                                alt={selectedPost.title}
+                                className="post-detail-image"
+                            />
+                        )}
+
+                        <div className="post-detail-content">
+                            <span className="post-category">
+                                Tin HOTFOOD
+                            </span>
+
+                            <h2>
+                                {selectedPost.title}
+                            </h2>
+
+                            <p className="post-detail-date">
+                                <i className="fa-regular fa-calendar mr-1"></i>
+                                Ngày đăng: {new Date(selectedPost.createdDate).toLocaleDateString('vi-VN')}
+                            </p>
+
+                            <div
+                                className="post-detail-text"
+                                dangerouslySetInnerHTML={{
+                                    __html: selectedPost.content || selectedPost.description || selectedPost.shortDescription || 'Bài viết chưa có nội dung chi tiết.'
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

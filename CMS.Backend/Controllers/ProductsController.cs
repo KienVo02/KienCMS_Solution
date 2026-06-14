@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CMS.Data;
-using CMS.Data.Entities;
 
 namespace CMS.Backend.Controllers
 {
@@ -23,6 +22,7 @@ namespace CMS.Backend.Controllers
             try
             {
                 var products = await _context.Products
+                    .Include(p => p.CategoryProduct)
                     .OrderByDescending(p => p.Id)
                     .Select(p => new
                     {
@@ -30,7 +30,14 @@ namespace CMS.Backend.Controllers
                         p.Name,
                         p.Price,
                         p.ImageUrl,
-                        p.StockQuantity
+                        p.StockQuantity,
+
+                        // Dòng này bắt buộc để React lọc theo danh mục
+                        p.CategoryProductId,
+
+                        CategoryName = p.CategoryProduct != null
+                            ? p.CategoryProduct.Name
+                            : ""
                     })
                     .ToListAsync();
 
@@ -46,13 +53,14 @@ namespace CMS.Backend.Controllers
             }
         }
 
-        // GET: api/Products/categoryproduct/1
+        // GET: api/Products/category/1
         [HttpGet("category/{categoryProductId}")]
         public async Task<IActionResult> GetByCategoryProduct(int categoryProductId)
         {
             try
             {
                 var products = await _context.Products
+                    .Include(p => p.CategoryProduct)
                     .Where(p => p.CategoryProductId == categoryProductId)
                     .OrderByDescending(p => p.Id)
                     .Select(p => new
@@ -61,7 +69,12 @@ namespace CMS.Backend.Controllers
                         p.Name,
                         p.Price,
                         p.ImageUrl,
-                        p.StockQuantity
+                        p.StockQuantity,
+                        p.CategoryProductId,
+
+                        CategoryName = p.CategoryProduct != null
+                            ? p.CategoryProduct.Name
+                            : ""
                     })
                     .ToListAsync();
 
@@ -84,6 +97,7 @@ namespace CMS.Backend.Controllers
             try
             {
                 var product = await _context.Products
+                    .Include(p => p.CategoryProduct)
                     .Where(p => p.Id == id)
                     .Select(p => new
                     {
@@ -93,7 +107,11 @@ namespace CMS.Backend.Controllers
                         p.ImageUrl,
                         p.StockQuantity,
                         p.Description,
-                        p.CategoryProductId
+                        p.CategoryProductId,
+
+                        CategoryName = p.CategoryProduct != null
+                            ? p.CategoryProduct.Name
+                            : ""
                     })
                     .FirstOrDefaultAsync();
 
