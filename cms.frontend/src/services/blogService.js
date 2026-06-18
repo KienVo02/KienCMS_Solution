@@ -1,23 +1,21 @@
-﻿import axiosClient from '../api/axiosClient';
+import axiosClient from '../api/axiosClient';
 
 const blogService = {
-    // 1. Hàm lấy danh sách toàn bộ bài viết
     getAllPosts: () => {
-        const url = '/Posts';
-        return axiosClient.get(url);
+        return axiosClient.get('/Posts');
     },
 
-    // 2. Hàm lấy chi tiết 1 bài viết theo ID
     getPostById: (id) => {
-        const url = `/Posts/${id}`;
-        return axiosClient.get(url);
+        return axiosClient.get(`/Posts/${id}`);
     },
 
-    // 3. Hàm lấy danh sách chuyên mục tin tức
+    getPostsByCategory: (categoryId) => {
+        return axiosClient.get(`/Posts/category/${categoryId}`);
+    },
+
     getBlogCategories: () => {
-        const url = '/Categories';
-        return axiosClient.get(url);
-    }
+        return axiosClient.get('/Categories');
+    },
 };
 
 export default blogService;

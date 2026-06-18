@@ -1,17 +1,17 @@
-﻿import axiosClient from '../api/axiosClient';
+import axiosClient from '../api/axiosClient';
 
 const productService = {
-    // Hàm gọi API lấy toàn bộ danh sách sản phẩm
     getAllProducts: () => {
-        const url = '/Products';
-        return axiosClient.get(url);
+        return axiosClient.get('/Products');
     },
 
-    // Hàm gọi API lấy chi tiết sản phẩm theo ID
     getProductById: (id) => {
-        const url = `/Products/${id}`;
-        return axiosClient.get(url);
-    }
+        return axiosClient.get(`/Products/${id}`);
+    },
+
+    getProductsByCategory: (categoryProductId) => {
+        return axiosClient.get(`/Products/category/${categoryProductId}`);
+    },
 };
 
 export default productService;
