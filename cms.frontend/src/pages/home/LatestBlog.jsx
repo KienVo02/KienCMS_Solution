@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Pagination from '../../components/Pagination';
 import PostCard from '../../components/PostCard';
 import blogService from '../../services/blogService';
 import { toArray } from '../../utils/data';
 
+const POST_PAGE_SIZE = 3;
+
 function LatestBlog() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -14,9 +18,9 @@ function LatestBlog() {
                 setLoading(true);
                 const data = await blogService.getAllPosts();
                 const latest = toArray(data)
-                    .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
-                    .slice(0, 3);
+                    .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
                 setPosts(latest);
+                setCurrentPage(1);
             } catch (error) {
                 console.error('Lỗi tải tin tức:', error);
                 setPosts([]);
@@ -27,6 +31,15 @@ function LatestBlog() {
 
         fetchPosts();
     }, []);
+
+    const startIndex = (currentPage - 1) * POST_PAGE_SIZE;
+    const visiblePosts = posts.slice(startIndex, startIndex + POST_PAGE_SIZE);
+
+    const handlePageChange = (page) => {
+        const totalPages = Math.ceil(posts.length / POST_PAGE_SIZE);
+        const nextPage = Math.min(Math.max(page, 1), totalPages);
+        setCurrentPage(nextPage);
+    };
 
     return (
         <section className="blog-band">
@@ -50,11 +63,21 @@ function LatestBlog() {
                 ) : posts.length === 0 ? (
                     <div className="empty-state">Chưa có bài viết tin tức.</div>
                 ) : (
-                    <div className="post-grid">
-                        {posts.map((post) => (
-                            <PostCard key={post.id} post={post} />
-                        ))}
-                    </div>
+                    <>
+                        <div className="post-grid">
+                            {visiblePosts.map((post) => (
+                                <PostCard key={post.id} post={post} />
+                            ))}
+                        </div>
+
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={posts.length}
+                            pageSize={POST_PAGE_SIZE}
+                            onPageChange={handlePageChange}
+                            itemLabel="bài viết"
+                        />
+                    </>
                 )}
             </div>
         </section>

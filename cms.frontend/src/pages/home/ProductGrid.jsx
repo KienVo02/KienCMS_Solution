@@ -1,12 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Pagination from '../../components/Pagination';
 import ProductCard from '../../components/ProductCard';
 import productService from '../../services/productService';
 import { toArray } from '../../utils/data';
 
+const PRODUCT_PAGE_SIZE = 6;
+
 function ProductGrid({ categoryId, categoryName }) {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -14,6 +18,7 @@ function ProductGrid({ categoryId, categoryName }) {
                 setLoading(true);
                 const data = await productService.getAllProducts();
                 setProducts(toArray(data));
+                setCurrentPage(1);
             } catch (error) {
                 console.error('Lỗi tải sản phẩm:', error);
                 setProducts([]);
@@ -25,13 +30,26 @@ function ProductGrid({ categoryId, categoryName }) {
         fetchProducts();
     }, []);
 
-    const visibleProducts = useMemo(() => {
-        const filtered = Number(categoryId) === 0
-            ? products
-            : products.filter((item) => Number(item.categoryProductId) === Number(categoryId));
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [categoryId]);
 
-        return filtered.slice(0, 6);
-    }, [categoryId, products]);
+    const filteredProducts = useMemo(() => (
+        Number(categoryId) === 0
+            ? products
+            : products.filter((item) => Number(item.categoryProductId) === Number(categoryId))
+    ), [categoryId, products]);
+
+    const visibleProducts = useMemo(() => {
+        const startIndex = (currentPage - 1) * PRODUCT_PAGE_SIZE;
+        return filteredProducts.slice(startIndex, startIndex + PRODUCT_PAGE_SIZE);
+    }, [currentPage, filteredProducts]);
+
+    const handlePageChange = (page) => {
+        const totalPages = Math.ceil(filteredProducts.length / PRODUCT_PAGE_SIZE);
+        const nextPage = Math.min(Math.max(page, 1), totalPages);
+        setCurrentPage(nextPage);
+    };
 
     return (
         <section className="product-showcase" id="home-products">
@@ -52,14 +70,24 @@ function ProductGrid({ categoryId, categoryName }) {
                         <div className="spinner-border text-warning" role="status"></div>
                         <p>Đang tải sản phẩm...</p>
                     </div>
-                ) : visibleProducts.length === 0 ? (
+                ) : filteredProducts.length === 0 ? (
                     <div className="empty-state">Chưa có sản phẩm trong danh mục này.</div>
                 ) : (
-                    <div className="product-grid">
-                        {visibleProducts.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
+                    <>
+                        <div className="product-grid">
+                            {visibleProducts.map((product) => (
+                                <ProductCard key={product.id} product={product} />
+                            ))}
+                        </div>
+
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={filteredProducts.length}
+                            pageSize={PRODUCT_PAGE_SIZE}
+                            onPageChange={handlePageChange}
+                            itemLabel="sản phẩm"
+                        />
+                    </>
                 )}
             </div>
         </section>

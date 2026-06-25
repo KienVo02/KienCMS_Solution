@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import Pagination from '../../components/Pagination';
 import categoryProductService from '../../services/categoryProductService';
 import productService from '../../services/productService';
 import { toArray } from '../../utils/data';
@@ -10,18 +11,23 @@ import ProductList from './ProductList';
 import ShopHeader from './ShopHeader';
 import ShopSidebar from './ShopSidebar';
 
+const SHOP_PAGE_SIZE = 6;
+
 function Shop() {
     const [searchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedCategoryId, setSelectedCategoryId] = useState(0);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(Number(searchParams.get('category') || 0));
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         setSearchTerm(searchParams.get('search') || '');
+        setSelectedCategoryId(Number(searchParams.get('category') || 0));
+        setCurrentPage(1);
     }, [searchParams]);
 
     useEffect(() => {
@@ -47,6 +53,10 @@ function Shop() {
         fetchShopData();
     }, []);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [maxPrice, minPrice, searchTerm, selectedCategoryId]);
+
     const filteredProducts = useMemo(() => {
         const keyword = searchTerm.trim().toLowerCase();
         const min = minPrice ? Number(minPrice) : 0;
@@ -65,11 +75,23 @@ function Shop() {
         });
     }, [maxPrice, minPrice, products, searchTerm, selectedCategoryId]);
 
+    const pagedProducts = useMemo(() => {
+        const startIndex = (currentPage - 1) * SHOP_PAGE_SIZE;
+        return filteredProducts.slice(startIndex, startIndex + SHOP_PAGE_SIZE);
+    }, [currentPage, filteredProducts]);
+
+    const handlePageChange = (page) => {
+        const totalPages = Math.ceil(filteredProducts.length / SHOP_PAGE_SIZE);
+        const nextPage = Math.min(Math.max(page, 1), totalPages);
+        setCurrentPage(nextPage);
+    };
+
     const clearFilters = () => {
         setSelectedCategoryId(0);
         setSearchTerm('');
         setMinPrice('');
         setMaxPrice('');
+        setCurrentPage(1);
     };
 
     return (
@@ -111,7 +133,16 @@ function Shop() {
                                 emptyTitle="Không tìm thấy sản phẩm"
                                 emptyText="Thử đổi danh mục, khoảng giá hoặc từ khóa tìm kiếm."
                             >
-                                <ProductList products={filteredProducts} />
+                                <>
+                                    <ProductList products={pagedProducts} />
+                                    <Pagination
+                                        currentPage={currentPage}
+                                        totalItems={filteredProducts.length}
+                                        pageSize={SHOP_PAGE_SIZE}
+                                        onPageChange={handlePageChange}
+                                        itemLabel="sản phẩm"
+                                    />
+                                </>
                             </LoadingOrEmpty>
                         </section>
                     </div>
