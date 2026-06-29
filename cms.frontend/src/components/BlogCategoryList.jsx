@@ -14,8 +14,8 @@ const BlogCategoryList = () => {
                 // Gọi sang lớp Service chứa trục Axios tập trung
                 const data = await blogService.getBlogCategories();
                 setBlogCategories(data); // Đẩy dữ liệu JSON nhận được vào State
-            } catch (error) {
-                console.error("Lỗi hệ thống khi gọi API chuyên mục tin tức:", error);
+            } catch {
+                setBlogCategories([]);
             } finally {
                 setLoading(false); // Đóng trạng thái Loading
             }

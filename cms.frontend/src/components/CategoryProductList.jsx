@@ -9,8 +9,6 @@ const CategoryProductList = ({ selectedCategoryId, onSelectCategory, onShowAll }
             try {
                 const data = await categoryProductService.getAllCategories();
 
-                console.log("Dữ liệu danh mục sản phẩm:", data);
-
                 if (Array.isArray(data)) {
                     setCategories(data);
                 } else if (data && Array.isArray(data.$values)) {
@@ -20,8 +18,7 @@ const CategoryProductList = ({ selectedCategoryId, onSelectCategory, onShowAll }
                 } else {
                     setCategories([]);
                 }
-            } catch (error) {
-                console.error("Lỗi khi tải danh mục sản phẩm:", error);
+            } catch {
                 setCategories([]);
             }
         };

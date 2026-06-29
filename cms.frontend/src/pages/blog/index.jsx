@@ -22,8 +22,7 @@ function Blog() {
                 const data = await blogService.getAllPosts();
                 setPosts(toArray(data));
                 setCurrentPage(1);
-            } catch (error) {
-                console.error('Lỗi tải danh sách bài viết:', error);
+            } catch {
                 setPosts([]);
             } finally {
                 setLoading(false);

@@ -1,16 +1,18 @@
-using Microsoft.EntityFrameworkCore;
+Ôªøusing Microsoft.EntityFrameworkCore;
 using CMS.Data;
+using CMS.Backend.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ======================================================
-// 1. KHU V?C –√NG K? D?CH V? - SERVICES CONTAINER
+// 1. KHU V?C ƒêƒÇNG K? D?CH V? - SERVICES CONTAINER
 // ======================================================
 
 // V?a nh?n di?n Controller API, v?a gi? View MVC c?
 builder.Services.AddControllersWithViews();
+builder.Services.AddMemoryCache();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -23,11 +25,14 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// –„ng k? DbContext
+// ƒêƒÉng k? DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Khai b·o x·c th?c Cookie
+// Email service d√πng cho ƒë∆°n h√†ng v√† qu√™n m·∫≠t kh·∫©u
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+
+// Khai b√°o x√°c th?c Cookie
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -35,7 +40,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Account/AccessDenied";
     });
 
-// Khai b·o chÌnh s·ch CORS
+// Khai b√°o ch√≠nh s√°ch CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -58,7 +63,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Swagger nÍn ?t ngo‡i if ? ch?y ˝?c c? Development v‡ Production
+// Swagger n√™n ƒë?t ngo√†i if ƒë? ch?y ƒë∆∞?c c? Development v√† Production
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -71,20 +76,20 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// CORS ph?i n?m sau UseRouting v‡ tr˝?c Authentication / Authorization
+// CORS ph?i n?m sau UseRouting v√† tr∆∞?c Authentication / Authorization
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 // ======================================================
-// 3. KHU V?C –?NH TUY?N PH¬N LU?NG - ROUTING MAP
+// 3. KHU V?C ƒê?NH TUY?N PH√ÇN LU?NG - ROUTING MAP
 // ======================================================
 
-// Ph‚n lu?ng A: API Controller d?ng /api/[controller]
+// Ph√¢n lu?ng A: API Controller d?ng /api/[controller]
 app.MapControllers();
 
-// Ph‚n lu?ng B: MVC Controller c?
+// Ph√¢n lu?ng B: MVC Controller c?
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

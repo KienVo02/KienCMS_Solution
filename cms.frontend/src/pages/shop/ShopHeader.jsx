@@ -5,7 +5,7 @@ function ShopHeader({ searchTerm, resultCount, onSearchChange, onClearFilters })
         <div className="shop-header">
             <div>
                 <h2>Tìm thấy {resultCount} sản phẩm</h2>
-                <p>Danh sách món ăn vặt đang được lấy từ API Products.</p>
+                <p>Danh sách được cập nhật bằng API Search/Filter từ Backend.</p>
             </div>
             <div className="shop-search-row">
                 <input

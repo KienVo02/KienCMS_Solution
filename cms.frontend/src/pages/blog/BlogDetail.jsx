@@ -19,8 +19,7 @@ function BlogDetail() {
                 const data = await blogService.getPostById(id);
                 setPost(data);
                 setError('');
-            } catch (fetchError) {
-                console.error('Lỗi tải chi tiết bài viết:', fetchError);
+            } catch {
                 setError('Không tìm thấy bài viết hoặc API chưa sẵn sàng.');
             } finally {
                 setLoading(false);

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace CMS.Data.Entities
 {
     // Khách hàng
@@ -33,7 +35,8 @@ namespace CMS.Data.Entities
         // ================= PASSWORD =================
 
         [Required(ErrorMessage = "Mật khẩu không được để trống")]
-        public string Password { get; set; }
+        [Column("Password")]
+        public string PasswordHash { get; set; } = string.Empty;
 
         // ================= RELATIONSHIP =================
 

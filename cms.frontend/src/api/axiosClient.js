@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/env';
 
 const axiosClient = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'https://localhost:7204/api',
+    baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -11,7 +12,6 @@ const axiosClient = axios.create({
 axiosClient.interceptors.response.use(
     (response) => response.data,
     (error) => {
-        console.error('Lỗi kết nối API:', error.message);
         return Promise.reject(error);
     }
 );

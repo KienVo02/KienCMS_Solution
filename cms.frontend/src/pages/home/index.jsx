@@ -5,6 +5,7 @@ import HeroBanner from './HeroBanner';
 import CategoryMenu from './CategoryMenu';
 import ProductGrid from './ProductGrid';
 import LatestBlog from './LatestBlog';
+import HomeProductSection from './HomeProductSection';
 
 function Home() {
     const [selectedCategory, setSelectedCategory] = useState({
@@ -20,6 +21,16 @@ function Home() {
                 selectedCategoryId={selectedCategory.id}
                 onShowAll={() => setSelectedCategory({ id: 0, name: 'Tất cả món ăn vặt' })}
                 onSelectCategory={(category) => setSelectedCategory(category)}
+            />
+            <HomeProductSection
+                eyebrow="Sản phẩm mới"
+                title="3 món mới nhất"
+                type="latest"
+            />
+            <HomeProductSection
+                eyebrow="Sản phẩm Hot / Bán chạy"
+                title="3 món bán chạy nhất"
+                type="best-sellers"
             />
             <ProductGrid
                 categoryId={selectedCategory.id}

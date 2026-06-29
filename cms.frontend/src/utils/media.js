@@ -1,6 +1,6 @@
-const apiBaseUrl = process.env.REACT_APP_API_URL || 'https://localhost:7204/api';
+import { IMAGE_BASE_URL } from '../config/env';
 
-export const API_HOST = (process.env.REACT_APP_API_HOST || apiBaseUrl.replace(/\/api\/?$/, '')).replace(/\/$/, '');
+export const API_HOST = IMAGE_BASE_URL;
 
 const cleanPath = (value) => String(value || '').trim();
 
@@ -15,12 +15,14 @@ export const getBackendImageUrl = (imageUrl, folder = '') => {
         return path;
     }
 
+    const normalizedHost = API_HOST ? API_HOST.replace(/\/$/, '') : '';
+
     if (path.startsWith('/')) {
-        return `${API_HOST}${path}`;
+        return `${normalizedHost}${path}`;
     }
 
     const normalizedFolder = folder ? `/${folder.replace(/^\/|\/$/g, '')}` : '';
-    return `${API_HOST}/img${normalizedFolder}/${path}`;
+    return `${normalizedHost}/img${normalizedFolder}/${path}`;
 };
 
 export const getProductImageUrl = (imageUrl) => (

@@ -52,7 +52,7 @@ export const addToCart = (product, quantity = 1) => {
     const nextQuantity = currentQuantity + amount;
 
     if (nextQuantity > stock) {
-        return { ok: false, message: 'Số lượng trong kho không đủ!' };
+        return { ok: false, message: 'Số lượng sản phẩm trong kho không đủ!' };
     }
 
     const cartItem = {

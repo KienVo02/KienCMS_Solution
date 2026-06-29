@@ -66,6 +66,9 @@ function Login() {
                         Mật khẩu
                         <input type="password" name="password" value={form.password} onChange={handleChange} required />
                     </label>
+                    <Link to="/forgot-password" className="auth-forgot-link">
+                        Quên mật khẩu?
+                    </Link>
                     <button type="submit" className="snack-btn snack-btn-primary full-width" disabled={submitting}>
                         {submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
                     </button>

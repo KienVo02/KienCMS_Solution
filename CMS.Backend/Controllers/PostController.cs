@@ -180,5 +180,52 @@ namespace CMS.Backend.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadImage()
+        {
+            var upload = Request.Form.Files.GetFile("upload") ?? Request.Form.Files.FirstOrDefault();
+
+            if (upload == null || upload.Length == 0)
+            {
+                return BadRequest(new
+                {
+                    uploaded = 0,
+                    error = new { message = "Vui lòng chọn hình ảnh cần upload" }
+                });
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var extension = Path.GetExtension(upload.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                return BadRequest(new
+                {
+                    uploaded = 0,
+                    error = new { message = "Chỉ cho phép upload file hình ảnh" }
+                });
+            }
+
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "img", "posts-content");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            await using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await upload.CopyToAsync(stream);
+            }
+
+            var url = $"/img/posts-content/{fileName}";
+
+            return Ok(new
+            {
+                uploaded = 1,
+                fileName,
+                url
+            });
+        }
     }
 }

@@ -11,12 +11,17 @@ function ProductInfo({ product }) {
 
     const updateQuantity = (nextValue) => {
         const next = Math.max(1, Number(nextValue || 1));
+
+        if (stock > 0 && next > stock) {
+            setNotice('Số lượng sản phẩm trong kho không đủ!');
+        }
+
         setQuantity(stock > 0 ? Math.min(next, stock) : 1);
     };
 
     const handleAddToCart = () => {
         if (quantity > stock) {
-            setNotice('Số lượng trong kho không đủ!');
+            setNotice('Số lượng sản phẩm trong kho không đủ!');
             return;
         }
 

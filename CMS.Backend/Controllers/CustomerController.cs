@@ -1,4 +1,5 @@
-﻿using CMS.Data;
+using CMS.Backend.Services;
+using CMS.Data;
 using CMS.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,22 +9,16 @@ namespace CMS.Backend.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        // Constructor Injection
         public CustomerController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // ================= INDEX =================
-
         public IActionResult Index()
         {
             var customers = _context.Customers.ToList();
-
             return View(customers);
         }
-
-        // ================= CREATE =================
 
         [HttpGet]
         public IActionResult Create()
@@ -34,20 +29,28 @@ namespace CMS.Backend.Controllers
         [HttpPost]
         public IActionResult Create(Customer model)
         {
-            // Kiểm tra dữ liệu hợp lệ
-            if (ModelState.IsValid == false)
+            if (string.IsNullOrWhiteSpace(model.PasswordHash))
+            {
+                ModelState.AddModelError(nameof(model.PasswordHash), "Mật khẩu không được để trống");
+            }
+
+            var emailExists = _context.Customers.Any(c => c.Email == model.Email);
+            if (emailExists)
+            {
+                ModelState.AddModelError(nameof(model.Email), "Email này đã được đăng ký");
+            }
+
+            if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
+            model.PasswordHash = PasswordHashService.HashPassword(model.PasswordHash);
             _context.Customers.Add(model);
-
             _context.SaveChanges();
 
             return RedirectToAction("Index");
         }
-
-        // ================= EDIT =================
 
         [HttpGet]
         public IActionResult Edit(int id)
@@ -59,26 +62,45 @@ namespace CMS.Backend.Controllers
                 return NotFound();
             }
 
+            customer.PasswordHash = string.Empty;
             return View(customer);
         }
 
         [HttpPost]
         public IActionResult Edit(Customer model)
         {
-            // Kiểm tra dữ liệu hợp lệ
-            if (ModelState.IsValid == false)
+            ModelState.Remove(nameof(model.PasswordHash));
+
+            var emailExists = _context.Customers.Any(c => c.Id != model.Id && c.Email == model.Email);
+            if (emailExists)
+            {
+                ModelState.AddModelError(nameof(model.Email), "Email này đã được đăng ký");
+            }
+
+            if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            _context.Customers.Update(model);
+            var customer = _context.Customers.Find(model.Id);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            customer.FullName = model.FullName;
+            customer.Email = model.Email;
+            customer.Phone = model.Phone;
+            customer.Address = model.Address;
+
+            if (!string.IsNullOrWhiteSpace(model.PasswordHash))
+            {
+                customer.PasswordHash = PasswordHashService.HashPassword(model.PasswordHash);
+            }
 
             _context.SaveChanges();
-
             return RedirectToAction("Index");
         }
-
-        // ================= DELETE =================
 
         public IActionResult Delete(int id)
         {
@@ -87,7 +109,6 @@ namespace CMS.Backend.Controllers
             if (customer != null)
             {
                 _context.Customers.Remove(customer);
-
                 _context.SaveChanges();
             }
 

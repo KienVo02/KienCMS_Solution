@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import productService from '../services/productService';
 import { CART_EVENT, getCartCount } from '../utils/cart';
 
 const getStoredCustomer = () => {
@@ -13,6 +14,7 @@ const getStoredCustomer = () => {
 
 function Header() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [searchTerm, setSearchTerm] = useState('');
     const [cartCount, setCartCount] = useState(getCartCount());
     const [customer, setCustomer] = useState(getStoredCustomer());
@@ -33,6 +35,29 @@ function Header() {
             window.removeEventListener('storage', syncHeader);
         };
     }, []);
+
+    useEffect(() => {
+        const keyword = searchTerm.trim();
+
+        if (!keyword) {
+            return undefined;
+        }
+
+        const timer = window.setTimeout(async () => {
+            try {
+                await productService.searchProducts({ keyword });
+            } catch {
+                // UI kết quả ở trang Shop sẽ xử lý trạng thái rỗng nếu API không trả dữ liệu.
+            }
+
+            const target = `/shop?search=${encodeURIComponent(keyword)}`;
+            if (`${location.pathname}${location.search}` !== target) {
+                navigate(target, { replace: location.pathname === '/shop' });
+            }
+        }, 350);
+
+        return () => window.clearTimeout(timer);
+    }, [location.pathname, location.search, navigate, searchTerm]);
 
     const handleSearch = (event) => {
         event.preventDefault();

@@ -14,7 +14,7 @@ import ShopSidebar from './ShopSidebar';
 const SHOP_PAGE_SIZE = 6;
 
 function Shop() {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -31,57 +31,59 @@ function Shop() {
     }, [searchParams]);
 
     useEffect(() => {
-        const fetchShopData = async () => {
+        const fetchCategories = async () => {
             try {
-                setLoading(true);
-                const [productData, categoryData] = await Promise.all([
-                    productService.getAllProducts(),
-                    categoryProductService.getAllCategories(),
-                ]);
-
-                setProducts(toArray(productData));
+                const categoryData = await categoryProductService.getAllCategories();
                 setCategories(toArray(categoryData).filter((item) => item.isActive !== false));
-            } catch (error) {
-                console.error('Lỗi tải dữ liệu cửa hàng:', error);
-                setProducts([]);
+            } catch {
                 setCategories([]);
-            } finally {
-                setLoading(false);
             }
         };
 
-        fetchShopData();
+        fetchCategories();
     }, []);
 
     useEffect(() => {
-        setCurrentPage(1);
+        let cancelled = false;
+
+        const timer = window.setTimeout(async () => {
+            try {
+                setLoading(true);
+                const data = await productService.searchProducts({
+                    keyword: searchTerm.trim() || undefined,
+                    categoryProductId: Number(selectedCategoryId) || undefined,
+                    minPrice: minPrice !== '' ? Number(minPrice) : undefined,
+                    maxPrice: maxPrice !== '' ? Number(maxPrice) : undefined,
+                });
+
+                if (!cancelled) {
+                    setProducts(toArray(data));
+                    setCurrentPage(1);
+                }
+            } catch {
+                if (!cancelled) {
+                    setProducts([]);
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        }, 300);
+
+        return () => {
+            cancelled = true;
+            window.clearTimeout(timer);
+        };
     }, [maxPrice, minPrice, searchTerm, selectedCategoryId]);
-
-    const filteredProducts = useMemo(() => {
-        const keyword = searchTerm.trim().toLowerCase();
-        const min = minPrice ? Number(minPrice) : 0;
-        const max = maxPrice ? Number(maxPrice) : Number.MAX_SAFE_INTEGER;
-
-        return products.filter((product) => {
-            const price = Number(product.price || 0);
-            const matchesCategory = Number(selectedCategoryId) === 0
-                || Number(product.categoryProductId) === Number(selectedCategoryId);
-            const matchesSearch = !keyword
-                || String(product.name || '').toLowerCase().includes(keyword)
-                || String(product.categoryName || '').toLowerCase().includes(keyword);
-            const matchesPrice = price >= min && price <= max;
-
-            return matchesCategory && matchesSearch && matchesPrice;
-        });
-    }, [maxPrice, minPrice, products, searchTerm, selectedCategoryId]);
 
     const pagedProducts = useMemo(() => {
         const startIndex = (currentPage - 1) * SHOP_PAGE_SIZE;
-        return filteredProducts.slice(startIndex, startIndex + SHOP_PAGE_SIZE);
-    }, [currentPage, filteredProducts]);
+        return products.slice(startIndex, startIndex + SHOP_PAGE_SIZE);
+    }, [currentPage, products]);
 
     const handlePageChange = (page) => {
-        const totalPages = Math.ceil(filteredProducts.length / SHOP_PAGE_SIZE);
+        const totalPages = Math.ceil(products.length / SHOP_PAGE_SIZE) || 1;
         const nextPage = Math.min(Math.max(page, 1), totalPages);
         setCurrentPage(nextPage);
     };
@@ -92,6 +94,7 @@ function Shop() {
         setMinPrice('');
         setMaxPrice('');
         setCurrentPage(1);
+        setSearchParams({});
     };
 
     return (
@@ -122,22 +125,22 @@ function Shop() {
                         <section className="shop-main">
                             <ShopHeader
                                 searchTerm={searchTerm}
-                                resultCount={filteredProducts.length}
+                                resultCount={products.length}
                                 onSearchChange={setSearchTerm}
                                 onClearFilters={clearFilters}
                             />
 
                             <LoadingOrEmpty
                                 loading={loading}
-                                isEmpty={filteredProducts.length === 0}
-                                emptyTitle="Không tìm thấy sản phẩm"
+                                isEmpty={products.length === 0}
+                                emptyTitle="Không tìm thấy sản phẩm nào phù hợp với tiêu chí của bạn"
                                 emptyText="Thử đổi danh mục, khoảng giá hoặc từ khóa tìm kiếm."
                             >
                                 <>
                                     <ProductList products={pagedProducts} />
                                     <Pagination
                                         currentPage={currentPage}
-                                        totalItems={filteredProducts.length}
+                                        totalItems={products.length}
                                         pageSize={SHOP_PAGE_SIZE}
                                         onPageChange={handlePageChange}
                                         itemLabel="sản phẩm"

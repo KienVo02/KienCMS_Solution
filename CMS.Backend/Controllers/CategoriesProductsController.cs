@@ -30,7 +30,12 @@ namespace CMS.Backend.Controllers
                         c.Name,
                         c.Description,
                         c.DisplayOrder,
-                        c.IsActive
+                        c.IsActive,
+                        ImageUrl = _context.Products
+                            .Where(p => p.CategoryProductId == c.Id)
+                            .OrderByDescending(p => p.Id)
+                            .Select(p => p.ImageUrl)
+                            .FirstOrDefault()
                     })
                     .ToListAsync();
 

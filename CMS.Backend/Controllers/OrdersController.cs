@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using CMS.Backend.Services;
 using CMS.Data;
 using CMS.Data.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Net;
 
 namespace CMS.Backend.Controllers
 {
@@ -10,13 +13,14 @@ namespace CMS.Backend.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailSender _emailSender;
 
-        public OrdersController(ApplicationDbContext context)
+        public OrdersController(ApplicationDbContext context, IEmailSender emailSender)
         {
             _context = context;
+            _emailSender = emailSender;
         }
 
-        // POST: api/Orders
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDTO input)
         {
@@ -39,17 +43,15 @@ namespace CMS.Backend.Controllers
 
             try
             {
-                // 1. Kiểm tra khách hàng có tồn tại không
-                var customerExists = await _context.Customers
-                    .AnyAsync(c => c.Id == input.CustomerId);
+                var customer = await _context.Customers
+                    .FirstOrDefaultAsync(c => c.Id == input.CustomerId);
 
-                if (!customerExists)
+                if (customer == null)
                 {
                     await transaction.RollbackAsync();
                     return BadRequest(new { message = "Khách hàng không tồn tại" });
                 }
 
-                // 2. Tạo đơn hàng mới
                 var newOrder = new Order
                 {
                     OrderDate = DateTime.Now,
@@ -61,16 +63,14 @@ namespace CMS.Backend.Controllers
                 _context.Orders.Add(newOrder);
                 await _context.SaveChangesAsync();
 
-                // 3. Duyệt từng sản phẩm trong giỏ hàng
+                var emailItems = new List<OrderEmailItem>();
+
                 foreach (var item in input.Items)
                 {
                     if (item.Quantity <= 0)
                     {
                         await transaction.RollbackAsync();
-                        return BadRequest(new
-                        {
-                            message = "Số lượng mua phải lớn hơn 0"
-                        });
+                        return BadRequest(new { message = "Số lượng mua phải lớn hơn 0" });
                     }
 
                     var product = await _context.Products
@@ -79,22 +79,15 @@ namespace CMS.Backend.Controllers
                     if (product == null)
                     {
                         await transaction.RollbackAsync();
-                        return BadRequest(new
-                        {
-                            message = $"Không tìm thấy sản phẩm có Id = {item.ProductId}"
-                        });
+                        return BadRequest(new { message = $"Không tìm thấy sản phẩm có Id = {item.ProductId}" });
                     }
 
                     if (product.StockQuantity < item.Quantity)
                     {
                         await transaction.RollbackAsync();
-                        return BadRequest(new
-                        {
-                            message = $"Sản phẩm {product.Name} không đủ số lượng tồn kho"
-                        });
+                        return BadRequest(new { message = $"Sản phẩm {product.Name} không đủ số lượng tồn kho" });
                     }
 
-                    // 4. Tạo chi tiết đơn hàng
                     var orderDetail = new OrderDetail
                     {
                         OrderId = newOrder.Id,
@@ -104,19 +97,24 @@ namespace CMS.Backend.Controllers
                     };
 
                     _context.OrderDetails.Add(orderDetail);
-
-                    // 5. Trừ số lượng tồn kho
                     product.StockQuantity -= item.Quantity;
+
+                    emailItems.Add(new OrderEmailItem(
+                        product.Name,
+                        item.Quantity,
+                        product.Price));
                 }
 
                 await _context.SaveChangesAsync();
-
                 await transaction.CommitAsync();
+
+                var emailSent = await SendOrderEmailAsync(customer, newOrder, emailItems);
 
                 return StatusCode(201, new
                 {
                     message = "Đặt hàng thành công!",
-                    orderId = newOrder.Id
+                    orderId = newOrder.Id,
+                    emailSent
                 });
             }
             catch (Exception ex)
@@ -131,7 +129,6 @@ namespace CMS.Backend.Controllers
             }
         }
 
-        // GET: api/Orders/customer/1
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetOrdersByCustomer(int customerId)
         {
@@ -168,6 +165,43 @@ namespace CMS.Backend.Controllers
                 });
             }
         }
+
+        private async Task<bool> SendOrderEmailAsync(Customer customer, Order order, List<OrderEmailItem> items)
+        {
+            var culture = CultureInfo.GetCultureInfo("vi-VN");
+            var total = items.Sum(item => item.Quantity * item.UnitPrice);
+            var rows = string.Join("", items.Select(item => $"""
+                <tr>
+                    <td style="padding:8px;border-bottom:1px solid #eee">{WebUtility.HtmlEncode(item.ProductName)}</td>
+                    <td style="padding:8px;border-bottom:1px solid #eee;text-align:center">{item.Quantity}</td>
+                    <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">{item.UnitPrice.ToString("N0", culture)} đ</td>
+                    <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">{(item.Quantity * item.UnitPrice).ToString("N0", culture)} đ</td>
+                </tr>
+                """));
+
+            var htmlBody = $"""
+                <h2>KienCMS.SnackFood - Xác nhận đơn hàng #{order.Id}</h2>
+                <p>Xin chào <strong>{WebUtility.HtmlEncode(customer.FullName)}</strong>,</p>
+                <p>Cảm ơn bạn đã đặt hàng tại KienCMS.SnackFood. Thông tin đơn hàng của bạn như sau:</p>
+                <table style="width:100%;border-collapse:collapse">
+                    <thead>
+                        <tr>
+                            <th style="padding:8px;border-bottom:2px solid #ddd;text-align:left">Sản phẩm</th>
+                            <th style="padding:8px;border-bottom:2px solid #ddd;text-align:center">SL</th>
+                            <th style="padding:8px;border-bottom:2px solid #ddd;text-align:right">Đơn giá</th>
+                            <th style="padding:8px;border-bottom:2px solid #ddd;text-align:right">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>{rows}</tbody>
+                </table>
+                <p style="font-size:18px"><strong>Tổng cộng: {total.ToString("N0", culture)} đ</strong></p>
+                <p>Ghi chú: {WebUtility.HtmlEncode(order.Notes ?? "Không có")}</p>
+                """;
+
+            return await _emailSender.SendAsync(customer.Email, $"KienCMS.SnackFood - Đơn hàng #{order.Id}", htmlBody);
+        }
+
+        private record OrderEmailItem(string ProductName, int Quantity, decimal UnitPrice);
     }
 
     public class CreateOrderDTO

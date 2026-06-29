@@ -36,7 +36,7 @@ function ShopSidebar({
             <div className="filter-block">
                 <h2>Khoảng giá</h2>
                 <label>
-                    Từ
+                    Đơn giá Min
                     <input
                         type="number"
                         min="0"
@@ -46,7 +46,7 @@ function ShopSidebar({
                     />
                 </label>
                 <label>
-                    Đến
+                    Đơn giá Max
                     <input
                         type="number"
                         min="0"

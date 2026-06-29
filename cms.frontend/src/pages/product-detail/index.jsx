@@ -18,8 +18,7 @@ function ProductDetail() {
                 const data = await productService.getProductById(id);
                 setProduct(data);
                 setError('');
-            } catch (fetchError) {
-                console.error('Lỗi tải chi tiết sản phẩm:', fetchError);
+            } catch {
                 setError('Không tìm thấy sản phẩm hoặc API chưa sẵn sàng.');
             } finally {
                 setLoading(false);

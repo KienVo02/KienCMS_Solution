@@ -12,7 +12,8 @@ function LoadingOrEmpty({ loading, isEmpty, emptyTitle, emptyText, children }) {
 
     if (isEmpty) {
         return (
-            <div className="empty-state">
+            <div className="empty-state illustrated-empty">
+                <img src="/assets/snack-feature.jpg" alt="Không tìm thấy sản phẩm" />
                 <strong>{emptyTitle}</strong>
                 <p>{emptyText}</p>
             </div>

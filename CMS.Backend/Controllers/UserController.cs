@@ -1,34 +1,26 @@
-﻿using CMS.Data;
+using CMS.Backend.Services;
+using CMS.Data;
 using CMS.Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Backend.Controllers
 {
-    using Microsoft.AspNetCore.Authorization; // Cần thêm namespace này 
-
-
-
-    [Authorize(Roles = "Admin")] // Chỉ tài khoản có Role là Admin mới được phép vào 
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        // Constructor Injection
         public UserController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // ================= INDEX =================
-
         public IActionResult Index()
         {
             var users = _context.Users.ToList();
-
             return View(users);
         }
-
-        // ================= CREATE =================
 
         [HttpGet]
         public IActionResult Create()
@@ -39,19 +31,28 @@ namespace CMS.Backend.Controllers
         [HttpPost]
         public IActionResult Create(User model)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(model.PasswordHash))
             {
-                _context.Users.Add(model);
-
-                _context.SaveChanges();
-
-                return RedirectToAction("Index");
+                ModelState.AddModelError(nameof(model.PasswordHash), "Mật khẩu không được để trống");
             }
 
-            return View(model);
-        }
+            var usernameExists = _context.Users.Any(u => u.Username == model.Username);
+            if (usernameExists)
+            {
+                ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập đã tồn tại");
+            }
 
-        // ================= EDIT =================
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            model.PasswordHash = PasswordHashService.HashPassword(model.PasswordHash);
+            _context.Users.Add(model);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
 
         [HttpGet]
         public IActionResult Edit(int id)
@@ -63,25 +64,44 @@ namespace CMS.Backend.Controllers
                 return NotFound();
             }
 
+            user.PasswordHash = string.Empty;
             return View(user);
         }
 
         [HttpPost]
         public IActionResult Edit(User model)
         {
-            if (ModelState.IsValid)
+            ModelState.Remove(nameof(model.PasswordHash));
+
+            var usernameExists = _context.Users.Any(u => u.Id != model.Id && u.Username == model.Username);
+            if (usernameExists)
             {
-                _context.Users.Update(model);
-
-                _context.SaveChanges();
-
-                return RedirectToAction("Index");
+                ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập đã tồn tại");
             }
 
-            return View(model);
-        }
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
 
-        // ================= DELETE =================
+            var user = _context.Users.Find(model.Id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.FullName = model.FullName;
+            user.Username = model.Username;
+            user.Role = model.Role;
+
+            if (!string.IsNullOrWhiteSpace(model.PasswordHash))
+            {
+                user.PasswordHash = PasswordHashService.HashPassword(model.PasswordHash);
+            }
+
+            _context.SaveChanges();
+            return RedirectToAction("Index");
+        }
 
         public IActionResult Delete(int id)
         {
@@ -90,7 +110,6 @@ namespace CMS.Backend.Controllers
             if (user != null)
             {
                 _context.Users.Remove(user);
-
                 _context.SaveChanges();
             }
 

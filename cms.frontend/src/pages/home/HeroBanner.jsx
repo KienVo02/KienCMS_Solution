@@ -36,8 +36,7 @@ function HeroBanner() {
                 setProducts(toArray(productData));
                 setPosts(toArray(postData));
                 setCategories(toArray(categoryData).filter((item) => item.isActive !== false));
-            } catch (error) {
-                console.error('Lỗi tải dữ liệu HeroBanner:', error);
+            } catch {
                 setProducts([]);
                 setPosts([]);
                 setCategories([]);

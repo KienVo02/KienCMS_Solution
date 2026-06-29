@@ -19,8 +19,7 @@ function ProductGrid({ categoryId, categoryName }) {
                 const data = await productService.getAllProducts();
                 setProducts(toArray(data));
                 setCurrentPage(1);
-            } catch (error) {
-                console.error('Lỗi tải sản phẩm:', error);
+            } catch {
                 setProducts([]);
             } finally {
                 setLoading(false);

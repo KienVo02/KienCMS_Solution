@@ -104,6 +104,22 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.ckeditor.com/4.22.1/standard-all/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('Content', {
+            height: 360,
+            allowedContent: true,
+            versionCheck: false,
+            extraPlugins: 'uploadimage',
+            removePlugins: 'exportpdf,easyimage,cloudservices',
+            clipboard_handleImages: false,
+            uploadUrl: '@Url.Action("UploadImage", "Post")',
+            imageUploadUrl: '@Url.Action("UploadImage", "Post")',
+            filebrowserUploadUrl: '@Url.Action("UploadImage", "Post")',
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Post")',
+            filebrowserUploadMethod: 'form'
+        });
+    </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

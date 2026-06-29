@@ -21,8 +21,7 @@ function LatestBlog() {
                     .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
                 setPosts(latest);
                 setCurrentPage(1);
-            } catch (error) {
-                console.error('Lỗi tải tin tức:', error);
+            } catch {
                 setPosts([]);
             } finally {
                 setLoading(false);

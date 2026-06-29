@@ -73,14 +73,15 @@
         <div class="mb-3">
 
             <label class="form-label fw-bold">
-                Mật khẩu:
+                Mật khẩu mới:
             </label>
 
-            <input asp-for="Password"
+            <input asp-for="PasswordHash"
                    type="password"
-                   class="form-control" />
+                   class="form-control"
+                   placeholder="Để trống nếu không đổi mật khẩu" />
 
-            <span asp-validation-for="Password"
+            <span asp-validation-for="PasswordHash"
                   class="text-danger"></span>
 
         </div>
