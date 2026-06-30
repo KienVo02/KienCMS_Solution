@@ -57,6 +57,12 @@ var app = builder.Build();
 // 2. KHU V?C C?U H?NH MIDDLEWARE - REQUEST PIPELINE
 // ======================================================
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Permissions-Policy"] = "unload=(self)";
+    await next();
+});
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
